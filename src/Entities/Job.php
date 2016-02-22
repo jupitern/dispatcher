@@ -9,10 +9,10 @@ class Job implements JobInterface
 {
 
 	public $pid;
-    public $name;
-    public $description;
+	public $name;
+	public $description;
 	/** @var array Lib\JobDispatcher\Interfaces\TaskInterface */
-    public $tasks = [];
+	public $tasks = [];
 	public $nextRunDate;
 
 	public $success = false;
@@ -94,32 +94,34 @@ class Job implements JobInterface
 
 				$task = $this->tasksIterator->current();
 
-				if (method_exists($this, "beforeTask_".$task->pid)) {
-					$this->{"beforeTask_".$task->pid}($task);
-					if ($this->taskSkip) {
-						$this->taskSkip = false;
-						continue;
-					}
-					if ($this->terminateExecution) break;
-				}
-
 				try {
 					$this->beforeTask($task);
+
+					if (method_exists($this, "beforeTask_".$task->pid)) {
+						$this->{"beforeTask_".$task->pid}($task);
+						if ($this->taskSkip) {
+							$this->taskSkip = false;
+							continue;
+						}
+						if ($this->terminateExecution) break;
+					}
+
 					$task->run();
+
+					if (method_exists($this, "afterTask_".$task->pid)) {
+						$this->{"afterTask_" . $task->pid}($task);
+						if ($this->taskSkip) {
+							$this->taskSkip = false;
+							continue;
+						}
+						if ($this->terminateExecution) break;
+					}
+
 					$this->afterTask($task);
 				}
 				catch (Exception $e) {
 					$this->afterTask($task);
 					throw $e;
-				}
-
-				if (method_exists($this, "afterTask_".$task->pid)) {
-					$this->{"afterTask_" . $task->pid}($task);
-					if ($this->taskSkip) {
-						$this->taskSkip = false;
-						continue;
-					}
-					if ($this->terminateExecution) break;
 				}
 
 				$this->tasksIterator->next();
