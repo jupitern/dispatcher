@@ -95,8 +95,6 @@ class Job implements JobInterface
 				$task = $this->tasksIterator->current();
 
 				try {
-					$this->beforeTask($task);
-
 					if (method_exists($this, "beforeTask_".$task->pid)) {
 						$this->{"beforeTask_".$task->pid}($task);
 						if ($this->taskSkip) {
@@ -106,7 +104,9 @@ class Job implements JobInterface
 						if ($this->terminateExecution) break;
 					}
 
+					$this->beforeTask($task);
 					$task->run();
+					$this->afterTask($task);
 
 					if (method_exists($this, "afterTask_".$task->pid)) {
 						$this->{"afterTask_" . $task->pid}($task);
@@ -116,8 +116,6 @@ class Job implements JobInterface
 						}
 						if ($this->terminateExecution) break;
 					}
-
-					$this->afterTask($task);
 				}
 				catch (Exception $e) {
 					$this->afterTask($task);
