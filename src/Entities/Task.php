@@ -91,10 +91,10 @@ abstract class Task implements TaskInterface
 			$this->success = true;
 		}
 		catch (\Exception $e) {
-			$this->errorMsg = $e->getMessage();
+			$this->errorMsg = $e->getMessage() ." on file ".$e->getFile().":".$e->getLine();
 			$this->success = false;
 			$this->endDate = new \DateTime();
-			throw new \Exception("Task '{$this->pid}' error: {$e->getMessage()}");
+			throw new \Exception("Task '{$this->pid}' error: ".$this->errorMsg);
 		}
 		return $this->output;
 	}
