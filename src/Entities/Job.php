@@ -117,7 +117,7 @@ class Job implements JobInterface
 						if ($this->terminateExecution) break;
 					}
 				}
-				catch (Exception $e) {
+				catch (\Exception $e) {
 					$this->afterTask($task);
 					throw $e;
 				}
